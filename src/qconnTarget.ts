@@ -1,46 +1,65 @@
 'use strict';
 
-const telnet = require('telnet-client');
+import Telnet from 'telnet-client';
+const conn = new Telnet();
 
 export class QconnTarget {
-    readonly shellPromptMatch = '<qconn-broker>';
+    readonly shellPromptMatch = 'QCONN';
     readonly infoCommand = 'Info';
 
     private host: string;
     private port: number;
     private timeout: number;
-    telnet: any = new telnet();
+    // private conn = new Telnet();
+    private connected: boolean;
 
     constructor(host: string, port: number, timeout: number) {
         this.host = host;
         this.port = port;
         this.timeout = timeout;
+        this.connected = false;
     }
 
-    async open() {  
+    isConnected(): boolean {
+        return this.connected;
+    }
+
+    async open(): Promise<boolean> {  
         // these parameters are just examples and most probably won't work for your use-case.
-        let params = {
+        const params = {
             host: this.host,
             port: this.port,
             shellPrompt: this.shellPromptMatch,
             timeout: this.timeout
         };
     
-        try {
-            await this.telnet.connect(params);
-        } catch(error) {
+        console.log('state', conn.state);
+        if (this.connected) {
             return false;
         }
-        
-        return true;
+
+        try {
+            await conn.connect(params);
+            this.connected = true;
+            const info = await conn.exec(this.infoCommand);
+            console.log('Info:', info);
+            return true;
+        } catch(error) {
+            console.log('Fail to connect with error', error);
+            return false;
+        }
     }
 
-    async close() {
-        await this.telnet.end();
+    close() {
+        if (!this.connected) {
+            conn.end();
+            this.connected = false;
+        }
     }
 
-    async getInfo() {
-        let info = await this.telnet.exec(this.infoCommand);
+    async getInfo(): Promise<string>{
+        console.log('state', conn.state);
+        const info = await conn.exec(this.infoCommand);
         return info;
     }
 }

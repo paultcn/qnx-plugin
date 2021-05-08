@@ -10,15 +10,20 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:qnx-plugin.helloWorld",
+		"onCommand:qnx-plugin.connect",
+		"onCommand:qnx-plugin.getInfo",
 		"onView:qnx-explorer"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "qnx-plugin.helloWorld",
-				"title": "Hello World"
+				"command": "qnx-plugin.connect",
+				"title": "Connect to target"
+			},
+			{
+				"command": "qnx-plugin.getInfo",
+				"title": "Get target info"
 			}
 		],
 		"viewsContainers": {
